@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.movie.mapper.BoardMapper">
+<!-- 모두 조회 부분 (select *) -->
+	<select id="getList" resultType="com.movie.domain.BoardVO">
+	    <![CDATA[
+	    	select * from tbl_board where bno > 0
+	    ]]>
+	</select>
+
+<!-- insert 1부분 : 둘중 아무거나 사용해도 된다. -->
+	<insert id="insert">
+		insert into tbl_board(bno,title,content,writer,rating)
+		values(seq_board.nextval,#{title},#{content},#{writer},#{rating})
+	</insert>
+<!-- insert 2부분 : 둘중 아무거나 사용해도 된다. -->
+	<insert id="insertSelectKey">
+		<selectKey keyProperty="bno" order="BEFORE"	resultType="long">
+			select seq_board.nextval from dual
+		</selectKey>
+		insert into tbl_board(bno,title,content,writer,rating)
+		values(#{bno},#{title},#{content},#{writer},#{rating})
+	</insert>
+	
+<!-- Read부분 (select) -->
+	<select id="read" resultType="com.movie.domain.BoardVO">
+		select * from tbl_board where bno = #{bno}
+	</select>
+	
+<!-- delete부분-->
+	<delete id="delete">
+		delete from tbl_board where bno = #{bno}
+	</delete>
+	
+<!-- update부분-->
+	<update id="update">
+		update tbl_board
+		set title = #{title},
+		content = #{content},
+		writer = #{writer},
+		updateDate = sysdate
+		where bno = #{bno}	
+	</update>
+	
+	<!-- paging부분 -->
+	<select id="getListWithPaging" resultType="com.movie.domain.BoardVO">
+	    <![CDATA[
+	    	select bno, rating, title, content, writer, regdate, updatedate
+	    	from ( select /*+INDEX_DESC(tbl_board pk_board) */
+	    	            rownum rn, bno, rating, title, content, writer, regdate, updatedate
+	    	       from tbl_board
+	    	       where rownum <= #{pageNum} * #{amount})
+	    	where rn > (#{pageNum}-1) * #{amount}
+	    ]]>
+	</select>
+	
+	
+	
+</mapper>
